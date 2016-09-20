@@ -1,1 +1,3 @@
-Flask==0.11.1
+Flask
+psycopg2
+Flask-SQLAlchemy
