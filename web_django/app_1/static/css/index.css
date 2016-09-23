@@ -31,3 +31,20 @@
 .jumbotron .lang-logo img {
     max-width: 100%
 }
+
+#tooltip{
+    width : 250px;
+    margin: 10px auto;
+}
+#tooltip span{
+    display: none;
+}
+#tooltip:hover span {
+    display:block;
+    position:relative;
+    overflow:hidden;
+    font-weight: bold;
+    background-color: #58bb48;
+    border-radius: 3px;
+    padding: 10px;
+}

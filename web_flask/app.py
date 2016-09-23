@@ -1,8 +1,12 @@
 # -*- coding: utf-8 -*-
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, session
 from flask.ext.sqlalchemy import SQLAlchemy
+import os
 
 app = Flask(__name__)
+app.secret_key = os.urandom(32)
+
+# set connection with postgres
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgres://myprojectuser:helloDjango@172.17.0.2:5432/myproject'
 db = SQLAlchemy(app)
 
@@ -26,6 +30,7 @@ db.session.commit()
 # routes
 @app.route('/')
 def index():
+  session['auth_base'] = {'permission': 1, 'tkn': os.urandom(12)}
   return render_template('index.html')
 
 @app.route('/prereg', methods = ['POST'])
