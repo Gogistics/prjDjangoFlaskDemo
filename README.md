@@ -1,12 +1,14 @@
 
 ### For Demo
 
+To be continued...
+
 ##### Default MySQL Setting
 
 ```
 app@my_vm:/$ cd prjDjangoFlask/web_django/
 
-app@my_vm:web_django/$ docker run --name mysql_django -e MYSQL_ROOT_PASSWORD=Django168 -d mysql
+app@my_vm:web_django/$ docker run --name my_mysql -e MYSQL_ROOT_PASSWORD=Django168 -d mysql
 ```
 
 ##### Default Postgres Setting
@@ -19,10 +21,11 @@ pwd: Django168
 ```
 app@my_vm:/$ cd prjDjangoFlask/web_django/
 
-app@my_vm:web_django/$ docker run --name postgres_django:latest -e POSTGRES_PASSWORD=Django168 -d mdillon/postgis
+app@my_vm:web_django/$ docker run --name my_postgres -e POSTGRES_PASSWORD=Django168 -d mdillon/postgis
 ```
 
 ##### DB User
+
 db: myproject
 
 user: myprojectuser
@@ -30,6 +33,7 @@ user: myprojectuser
 pwd: helloDjango
 
 ##### Admin
+
 admin: gogistics
 
 pwd: Django168
@@ -39,7 +43,7 @@ app@my_vm:/$ cd prjDjangoFlask/web_django/
 
 app@my_vm:web_django/$ docker build -t app_django:latest .
 
-app@my_vm:web_django/$ docker run --name my_django -p 5001:8000 -d app_django:latest
+app@my_vm:web_django/$ docker run --name my_django -v $(pwd):/app -p 5001:8000 -d app_django:latest
 
 ```
 
