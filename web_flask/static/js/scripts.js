@@ -1,6 +1,6 @@
 (function($){
   /*
-  * calling order:
+    calling order:
     1. app.config()
     2. app.run()
     3. directive's compile functions (if they are found in the dom)
@@ -17,6 +17,7 @@
   initApp();
 
   function initApp(){
+
     // set module
     window.indexApp = window.indexApp || angular.module('indexApp', ['ngRoute'], function($locationProvider, $interpolateProvider){
 
@@ -48,8 +49,22 @@
                     .otherwise({redirectTo: '/section-1'});
     });
 
-    window.indexApp.run(function(){
-      // run
+    window.indexApp.run(function($window){
+      // enable socket
+      var protocol = $window.location.protocol, host = $window.location.host, my_url = protocol + '//' + host + '/test';
+      console.log(my_url);
+      window.socket = io.connect(my_url); // set connection
+
+      window.socket.on('connect', function() {
+        window.socket.emit('my_event', {data: 'emitted event from client!'});
+      });
+      window.socket.on('disconnect', function(msg) {
+        console.log(msg);
+        window.socket.emit('my_event', {data: 'disconnect'});
+      });
+      window.socket.on('my_response', function(msg) {
+        console.log(msg);
+      });
     });
 
     // services of serving $http
