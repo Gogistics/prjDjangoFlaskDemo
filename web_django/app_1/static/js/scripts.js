@@ -1,7 +1,7 @@
 (function($){
   'use strict';
   /*
-  * calling order:
+    calling order:
     1. app.config()
     2. app.run()
     3. directive's compile functions (if they are found in the dom)
@@ -47,8 +47,14 @@
                     .otherwise({redirectTo: '/section-1'});
     });
 
-    window.indexApp.run(function(){
-      // run
+    window.indexApp.run(function($window){
+      // enable socket
+      var protocol = $window.location.protocol, host = $window.location.host, my_url = protocol + '//' + host;
+      console.log(my_url);
+      window.socket = io.connect('http://' + document.domain + ':' + location.port);
+      window.socket.on('connect', function() {
+          window.socket.emit('my event', {data: 'I\'m connected!'});
+      });
     });
 
     // services of serving $http

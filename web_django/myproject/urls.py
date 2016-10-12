@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """myproject URL Configuration
 
 The `urlpatterns` list routes URLs to views. For more information please see:
@@ -16,7 +17,11 @@ Including another URLconf
 from django.conf.urls import include, url
 from django.contrib import admin
 
+from socketio import sdjango
+sdjango.autodiscover()
+
 urlpatterns = [
   url(r'^admin/', admin.site.urls),
   url(r'^app_1/', include('app_1.urls')),
+  url(r'^socket\.io/', include(sdjango.urls)),
 ]

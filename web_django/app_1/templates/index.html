@@ -12,7 +12,7 @@
 {% endblock %}
 
 {% block sub_js %}
-<script type="text/javascript">
+<script type="text/javascript" charset="utf-8">
   (function($){
   'use strict';
   /*
@@ -64,8 +64,22 @@
                     .otherwise({redirectTo: '/section-1'});
     });
 
-    window.indexApp.run(function(){
-      // run
+    window.indexApp.run(function($window, $timeout){
+      // enable socket
+      var protocol = $window.location.protocol, host = $window.location.host, my_url = protocol + '//' + host + '/echo';
+      console.log(my_url);
+      $window.socket = io.connect('/echo');
+
+      $window.socket.on('connect', function() {
+        console.log('got connected')
+        $window.socket.emit('my_event', {data: 'connected!'});
+      });
+      $window.socket.on('msg', function(msg) {
+        console.log(msg);
+      });
+      $window.socket.on('announcement', function(msg) {
+        console.log(msg);
+      });
     });
 
     // services of serving $http

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Django settings for myproject project.
 
@@ -37,7 +38,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'app_1.apps.App1Config',
+    'app_1.apps',
+    'myproject.socketio_runserver'
 ]
 
 MIDDLEWARE = [
