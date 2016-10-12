@@ -4,10 +4,10 @@ from flask_sqlalchemy import SQLAlchemy
 from datetime import timedelta
 from flask_socketio import SocketIO, emit
 from base64 import b64encode
-import os, time
+import os, time, random
 
 app = Flask(__name__)
-app.secret_key = os.urandom(32)
+app.secret_key = b64encode(os.urandom(32)).decode('utf-8')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
 
 # set socketio
@@ -20,9 +20,9 @@ def background_thread():
   """Example of how to send server generated events to clients."""
   count = 0
   while True:
-    socketio.sleep(1000)
+    socketio.sleep(1)
     count += 1
-    socketio.emit('my_response', {'data': 'Server generated event', 'count': count}, namespace='/test')
+    socketio.emit('my_realtime_data', {'data': 'Server generated event', 'count': count, 'random_number': random.randint(1,10)}, namespace='/test')
 
 
 # set connection with postgres
@@ -82,10 +82,10 @@ def partial(sub_template):
 def test_connect():
   print('client connected')
 
-  # example of background task
-  # global thread
-  # if thread is None:
-  #   thread = socketio.start_background_task(target = background_thread)
+  # example of background task for front-end real-time chart
+  global thread
+  if thread is None:
+    thread = socketio.start_background_task(target = background_thread)
   
   emit('my_response', {'data': 'Connected'})
 

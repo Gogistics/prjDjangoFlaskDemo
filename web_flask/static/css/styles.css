@@ -19,3 +19,32 @@
     position: relative;
     top: 50px;
 }
+
+/* D3 */
+.grid .tick {
+  stroke: lightgrey;
+  stroke-opacity: 0.5;
+  shape-rendering: crispEdges;
+    z-index: 90;
+}
+.grid path {
+  stroke-width: 0;
+    z-index: 100000;
+}
+.label{
+    color: #000;
+}
+.line {
+  fill: none;
+  stroke: #cf9e02;
+  stroke-width: 2px;
+}
+.axis{
+    z-index: 1000;
+}
+.axis path,
+.axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
