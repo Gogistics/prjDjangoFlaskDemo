@@ -49,9 +49,19 @@
   shape-rendering: crispEdges;
 }
 
-/* donut chart */
+/* responsive donut charts */
 .donut-chart{
   height: 100%;
-  display: block;
   float: left;
+}
+
+/* slider for donut chart */
+#slider {
+  width: 75%;
+  margin: 2em auto 1em;
+}
+.svg-container {
+  margin: 3em auto 0;
+  width: 350px;
+  height: 350px;
 }

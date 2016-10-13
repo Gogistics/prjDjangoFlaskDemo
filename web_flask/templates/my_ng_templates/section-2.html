@@ -1,13 +1,18 @@
 <div class="col-lg-12" ng-controller="donutsChartCtrl as ctrl" ng-init="ctrl.init()">
   <div class="panel panel-default">
       <div class="panel-heading">
-          <h3>Section-2</h3>
+          <h2>D3 Examples</h2>
       </div>
       <div class="panel-body">
-        Learn the Tech., Connect the World.
+        <h3>Learn the Tech., Connect the World.</h3>
         <hr>
-        <div>
-          <div donut-chart data="chart" ng-repeat="chart in ctrl.charts track by $index" class="donut-chart"></div>
+        <div donut-chart data="chart" ng-repeat="chart in ctrl.charts track by $index" class="donut-chart"></div>
+      </div>
+      <div class="panel-body">
+        <h3>Drag the slider to update donut chart</h3>
+        <div id="slider"></div>
+        <div class="svg-container">
+          <svg id="candidscore"></svg>
         </div>
       </div>
   </div>

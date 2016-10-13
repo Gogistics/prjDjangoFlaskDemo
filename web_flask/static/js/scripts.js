@@ -34,20 +34,29 @@
       REAL_TIME_DATA: []
     });
 
-    window.indexApp.config(function($routeProvider, $compileProvider){
+    window.indexApp.config(function($routeProvider, $compileProvider, $provide){
       // $compileProvider.debugInfoEnabled(false); // for production
 
       // routing config is usually done here
       $routeProvider.when("/realtime-chart", {
                         templateUrl : "my_ng_templates/section-1.html"
                     })
-                    .when("/section-2", {
+                    .when("/donut-charts", {
                         templateUrl : "my_ng_templates/section-2.html"
                     })
-                    .when("/section-3", {
+                    .when("/animation", {
                         templateUrl : "my_ng_templates/section-3.html"
                     })
                     .otherwise({redirectTo: '/realtime-chart'});
+
+      // decorator
+      $provide.decorator('myFactory', function($delegate){
+        $delegate.reverse = function(){
+          // decorate setData()
+          $delegate.setData($delegate.getData().split('').reverse().join(''));
+        };
+        return $delegate;
+      });
     });
 
     window.indexApp.run(function($window, APP_VALUES){
@@ -76,6 +85,22 @@
       }
     });
 
+    // factories
+    window.indexApp.factory('myFactory', function(){
+      var myStr = 'init data';
+      var addToStr = function(newStr){
+        myStr += newStr;
+      };
+      return {getData: function(){
+                  return myStr;
+                },
+              setData: function(data){
+                  myStr = data;
+                },
+              addData: addToStr};
+    });
+
+    // directives
     window.indexApp.directive('tooltip', function($window) {
         return {
             restrict: 'AE',
@@ -172,6 +197,10 @@
         APP_VALUES.REAL_TIME_DATA.push(msg);
         if(APP_VALUES.REAL_TIME_DATA.length > 1000) APP_VALUES.REAL_TIME_DATA.shift();
       });
+      
+      ctrl.playRingtone = function(arg_sound_path){
+        $window.document.getElementById('highPeakAlert').innerHTML = '<embed src="' + arg_sound_path + '" hidden="true" autostart="true" loop="false" />';
+      };
 
       ctrl.initRealtimeChart = function(){
         var n = 245,
@@ -203,6 +232,7 @@
                     .style('margin-left', -margin.left + 'px')
                     .append('g')
                     .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
+
         svg.append('defs')
           .append('clipPath')
           .attr('id', 'clip')
@@ -253,6 +283,7 @@
 
             // incomplete
             var currentVal = APP_VALUES.REAL_TIME_DATA.shift() || {random_number: 0};
+            if(currentVal['random_number'] > 8) ctrl.playRingtone('static/sounds/ringtone_2.mp3');
             data.push(currentVal['random_number']);
             
             svg.select('.line')
@@ -281,6 +312,190 @@
       angular.element($window).on('resize', function(){
         $scope.$digest(); // use $digest instead of $apply to only update the specific scope
       });
+
+      /* donut chart with slider */
+      var τ = Math.PI; // http://tauday.com/tau-manifesto
+      var arc = d3.svg.arc()
+          .innerRadius(250)
+          .outerRadius(0)
+          .startAngle(0);
+
+      // Draw the thing!
+      drawBadge("#candidscore");
+      updateScore(50, "#candidscore");
+
+      // Pass DOM selector to function, set up Canvas size
+      function drawBadge(svgID) {
+        var width = 500,
+          height = 500,
+          aspect = width / height;
+
+        // Create the SVG container, and apply a transform such that the origin is the
+        // center of the canvas. This way, we don't need to position arcs individually.
+        var svg = d3.select(svgID)
+            .attr("preserveAspectRatio", "xMidYMid")
+            .attr("viewBox", "0 0 500 500")
+            .attr("width", "100%")
+            .attr("height", "100%")
+            .append("g")
+            .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")")
+
+
+        // Add the background arc, from 0 to 100% (τ).
+        var background = svg.append("path")
+            .datum({endAngle: 2*τ})
+            .style("fill", "#f2f2f2")
+            .attr("transform", "rotate(-90)")
+            .attr("d", arc);
+
+        // Add the top arc in orange
+        var foreground_top = svg.append("path")
+            .attr("id", "foreground_top")
+            .datum({endAngle: 0 * τ})
+            .style("fill", "#fab923")
+            .attr("d", arc)
+            .attr("transform", "rotate(-90)");
+
+        // Add bottom arc in orange
+        var foreground_bottom = svg.append("path")
+            .attr("id", "foreground_bottom")
+            .datum({endAngle: 0 * -τ })
+            .style("fill", "#fab923")
+            .attr("d", arc)
+            .attr("transform", "rotate(-90)");
+
+        var trans_circ = svg.append("circle")
+            .attr("cx", 0)
+            .attr("cy", 0)
+            .attr("r", 210)
+            .attr("fill", "rgba(255,255,255, .25)");
+
+
+        // Create "def" element that will contain our drop shadow filter
+        var defs = svg.append("defs");
+
+        // Create our filter with an id of "#drop-shadow"
+        var filter = defs.append("filter")
+          .attr("id", "drop-shadow")
+          .attr("height", "130%");
+
+        // Create our Gaussian Blur with a standard deviation of 8
+        filter.append("feGaussianBlur")
+          .attr("in", "SourceAlpha")
+          .attr("stdDeviation", 8)
+          .attr("result", "blur");
+
+        // Translate the output of Gaussian Blur to (0,0), and store result in var offsetBlur
+        filter.append("feOffset")
+          .attr("in", "blur")
+          .attr("dx", 0)
+          .attr("dy", 0)
+          .attr("result", "offsetBlur");
+
+
+        // Control the opacity of the actual drop shadow with 'feComponentTransfer and SLOPE'
+        var comptransf = filter.append("feComponentTransfer");
+
+        comptransf.append("feFuncA")
+                  .attr("type", "linear")
+                  .attr("slope", .2);
+
+        // Overlay original SourceGraphic over translated blurred opacity by using feMerge filter ***ORDER IS IMPORTANT***
+        var feMerge = filter.append("feMerge");
+
+        feMerge.append("feMergeNode")
+        feMerge.append("feMergeNode")
+          .attr("in", "SourceGraphic");
+    
+
+        var white_circ = svg.append("circle")
+            .attr("cx", 0)
+            .attr("cx", 0)
+            .attr("r", 180)
+            .attr("id", "white_circ")
+            .style("filter", "url(#drop-shadow)")
+            .attr("fill", "white");
+         
+        var stroke_circ = svg.append("circle")
+            .attr("cx", 0)
+            .attr("cy", 0)
+            .attr("r", 160)
+            .attr("fill", "none")
+            .attr("stroke", "rgba(0,0,0,.125")
+            .attr("stroke-width", "1px");
+
+        var candidlogo = svg.append("g")
+                            .attr("transform", "translate(-295,-285), scale(1.75)");
+
+          candidlogo.append("path")
+              .attr("d", "M134.3,233.2L134.3,233.2c0-3.3,2.6-6.2,6-6.2c2.2,0,3.6,1,4.7,2.2l-0.8,0.8c-1-1-2.2-1.9-3.9-1.9c-2.7,0-4.7,2.2-4.7,5v0c0,2.8,2.1,5.1,4.8,5.1c1.7,0,2.9-0.9,3.9-2l0.8,0.7c-1.2,1.4-2.6,2.3-4.8,2.3 C136.9,239.3,134.3,236.5,134.3,233.2z" )
+              .attr("fill", "#A7A8AD");
+          candidlogo.append("path")
+                    .attr("d", "M147.3,235.6L147.3,235.6c0-2.5,2.1-3.9,5.1-3.9c1.6,0,2.8,0.2,3.9,0.5v-0.5c0-2.4-1.4-3.6-3.9-3.6 c-1.4,0-2.6,0.4-3.7,0.9l-0.4-1c1.3-0.6,2.6-1,4.2-1c1.6,0,2.8,0.4,3.7,1.3c0.8,0.8,1.2,1.9,1.2,3.3v7.3h-1.1v-2 c-0.8,1.1-2.3,2.2-4.5,2.2C149.6,239.3,147.3,238,147.3,235.6z M156.3,234.6v-1.3c-1-0.3-2.3-0.5-4-0.5c-2.5,0-3.9,1.1-3.9,2.7v0 c0,1.7,1.6,2.7,3.4,2.7C154.2,238.2,156.3,236.8,156.3,234.6z" )
+                    .attr("fill", "#A7A8AD");
+          candidlogo.append("path")
+                    .attr("d", "M161.4,227.3h1.1v2.2c0.8-1.4,2.1-2.5,4.2-2.5c3,0,4.7,2,4.7,4.8v7.2h-1.1v-7c0-2.4-1.4-4-3.7-4 c-2.3,0-4.1,1.7-4.1,4.2v6.8h-1.1V227.3z")
+                    .attr("fill", "#A7A8AD");
+          candidlogo.append("path")
+                    .attr("d", "M174.7,233.2L174.7,233.2c0-3.9,2.9-6.2,5.7-6.2c2.3,0,3.9,1.3,4.8,2.8v-7.6h1.1V239h-1.1v-2.6 c-1,1.5-2.5,2.9-4.8,2.9C177.6,239.3,174.7,237,174.7,233.2z M185.3,233.2L185.3,233.2c0-3.1-2.3-5.1-4.8-5.1 c-2.6,0-4.6,1.9-4.6,5v0c0,3.1,2.1,5.1,4.6,5.1C183,238.2,185.3,236.2,185.3,233.2z")
+                    .attr("fill", "#A7A8AD");
+          candidlogo.append("path")
+                    .attr("d", "M190.7,222.7h1.4v1.5h-1.4V222.7z M190.8,227.3h1.1V239h-1.1V227.3z")
+                    .attr("fill", "#A7A8AD");
+          candidlogo.append("path")
+                    .attr("d", "M195.6,233.2L195.6,233.2c0-3.9,2.9-6.2,5.7-6.2c2.3,0,3.9,1.3,4.8,2.8v-7.6h1.1V239h-1.1v-2.6 c-1,1.5-2.5,2.9-4.8,2.9C198.5,239.3,195.6,237,195.6,233.2z M206.2,233.2L206.2,233.2c0-3.1-2.3-5.1-4.8-5.1 c-2.6,0-4.6,1.9-4.6,5v0c0,3.1,2.1,5.1,4.6,5.1C203.9,238.2,206.2,236.2,206.2,233.2z")
+                    .attr("fill", "#A7A8AD");
+
+        var text_score = svg.append("text")
+          .attr("id", "scorenum")
+          .attr("x", 0)
+          .attr("y", 60)
+          .attr("font-family", "proxima nova")
+          .attr("text-anchor", "middle")
+          .attr("font-weight", "bold")
+          .attr("font-size", 195)
+          .attr("fill", "#555555");
+      }
+
+      function arcTweenTwo(transition, newAngle) {
+        transition.attrTween("d", function(d) {
+          var interpolate = d3.interpolate(d.endAngle, newAngle);
+          return function(t) {
+            d.endAngle = interpolate(t);
+            return arc(d);
+          };
+        });
+      }
+
+      function updateScore(score, svgID) {
+        console.log(score);
+        var decimalized = score / 100.0;
+        console.log(decimalized);
+        var our_svg = d3.select(svgID);
+        var foreground_top = our_svg.select("path#foreground_top");
+        var scorenum = our_svg.select("text#scorenum");
+        var foreground_bottom = our_svg.select("path#foreground_bottom");
+        scorenum.text(score);
+
+        foreground_top.transition()
+            .duration(1500)
+            .ease("elastic")
+            .call(arcTweenTwo, decimalized * τ );
+        foreground_bottom.transition()
+            .duration(1500)
+            .ease("elastic")
+            .call(arcTweenTwo, decimalized * -τ );
+      }
+
+      angular.element( "div#slider" ).slider({
+        start: 50,
+        min: 1,
+        max: 100,
+        value: 50,
+        slide: function( event, ui ) {
+          updateScore(ui.value, "#candidscore");
+        }
+      });
     }]);
     // end of ctrl of responsive donuts chart
 
@@ -291,8 +506,8 @@
         var data = scope.data,
           color = d3.scale.category10(),
           el = el[0],
-          width = myWindow.width() * 0.2,
-          height = myWindow.height() * 0.4,
+          width = myWindow.width() * 0.15,
+          height = myWindow.height() * 0.3,
           min = Math.min(width, height),
           pie = d3.layout.pie().sort(null),
           arc = d3.svg.arc()
@@ -304,13 +519,12 @@
 
         svg.on('mousedown', function(){
           scope.$apply(function(){
-            var num = Math.round(Math.random()* 10) + 1
-            scope.data = d3.range(num).map(Math.random)
+            var num = Math.round(Math.random()* 10) + 1;
+            scope.data = d3.range(num).map(Math.random);
           })
         });
 
         function arcTween(a) {
-          // see: http://bl.ocks.org/mbostock/1346410
           var i = d3.interpolate(this._current, a);
           this._current = i(0);
           return function(t) {
@@ -343,13 +557,13 @@
               d.startAngle = 2 * Math.PI - 0.001; d.endAngle = 2 * Math.PI; 
             })
             .attrTween('d', arcTween).remove();
-        })
+        });
 
         scope.$watch(function(){
           return myWindow.width() * myWindow.height();
         }, function(){
-          width = myWindow.width() * 0.2;
-          height = myWindow.height() * 0.4;
+          width = myWindow.width() * 0.15;
+          height = myWindow.height() * 0.3;
           min = Math.min(width, height);
           arc.outerRadius(min / 2 * 0.9).innerRadius(min / 2 * 0.5);
           svg.attr({width: width, height: height});
@@ -361,5 +575,81 @@
     });
     // end of donut chart directive
 
+    // decoratorCtrl
+    window.indexApp.controller('decoratorCtrl', ['$scope', 'myFactory', function($scope, myFactory){
+      var ctrl = this;
+      console.log(myFactory.getData());
+      myFactory.addData(' + hello decortaor');
+      myFactory.reverse();
+      console.log(myFactory.getData());
+
+      /* my-animation */
+      var width = 500,
+          height = 500;
+
+      var svg = d3.select("my-animation").append("svg")
+          .attr("width", width)
+          .attr("height", height)
+          .append("g")
+          .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
+
+      var gradient = svg.append("defs").append("linearGradient")
+          .attr("id", "gradient")
+          .attr("x1", "50%")
+          .attr("y1", "0%")
+          .attr("x2", "50%")
+          .attr("y2", "100%");
+
+      gradient.append("stop")
+          .attr("offset", "0%")
+          .attr("stop-color", "#fff");
+
+      gradient.append("stop")
+          .attr("offset", "30%")
+          .attr("stop-color", "#eee");
+
+      gradient.append("stop")
+          .attr("offset", "80%")
+          .attr("stop-color", "rgba(200,200,200,0)");
+          
+      gradient.append("stop")
+          .attr("offset", "100%")
+          .attr("stop-color", "rgba(255,255,255,0)");
+
+      // could use transparent gradient overlay to vary raindrop color
+      svg.selectAll("path")
+          .data(d3.range(360))
+          .enter()
+          .append("path")
+          .transition()
+          .delay(100)
+          .duration(3000)
+          .ease("bounce")
+          .attr("fill", "url(#gradient)")
+          .attr("d", function() { return raindrop(5 + Math.random() * 100); })
+          .attr("transform", function(d) {
+            return "rotate(" + d + ")"
+            
+            + "translate(" + (height / 6 + Math.random() * height / 16) + ",0)"
+                + "rotate(90)";
+          })
+          .each("end",function() { // the first position
+            d3.select(this)
+              .transition()
+              .duration(3000)
+              .attr("d", function() { return raindrop(0); }); // a new transition!;
+          });
+
+      // size is linearly proportional to square pixels (not exact, yet)
+      function raindrop(size) {
+        var r = Math.sqrt(size / Math.PI).toFixed(2);
+        return "M" + r + ",0"
+            + "A" + 0.5*r + "," + 0.3*r + " 0 1,1 " + -r + ",0"
+            + "C" + -r + "," + -r + " 0," + -2*r + " 0," + -12*r
+            + "C," + -r + " " + r + "," + -r + " " + r + ",0"
+            + "Z";
+      };
+    }]);
+    // end of decoratorCtrl
   };
 })(jQuery);
