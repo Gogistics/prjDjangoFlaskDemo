@@ -38,7 +38,7 @@
       // $compileProvider.debugInfoEnabled(false); // for production
 
       // routing config is usually done here
-      $routeProvider.when("/section-1", {
+      $routeProvider.when("/realtime-chart", {
                         templateUrl : "my_ng_templates/section-1.html"
                     })
                     .when("/section-2", {
@@ -47,7 +47,7 @@
                     .when("/section-3", {
                         templateUrl : "my_ng_templates/section-3.html"
                     })
-                    .otherwise({redirectTo: '/section-1'});
+                    .otherwise({redirectTo: '/realtime-chart'});
     });
 
     window.indexApp.run(function($window, APP_VALUES){
@@ -131,7 +131,39 @@
       }, true);
 
       w.bind('resize', function () {
-        $scope.$apply();
+        $scope.$apply(); // update all scopes including root and child scopes
+      });
+    }]);
+
+    window.indexApp.controller('realtimeChartCtrl', ['$scope', '$window', 'APP_VALUES', 'dataProvider', function($scope, $window, APP_VALUES, dataProvider){
+      // set variables and functions of ctrl
+      var ctrl = this;
+      ctrl.init = function(){
+        console.log('init realtime chart section...');
+      };
+
+      // resize listener for data visualization
+      var w = angular.element($window);
+      ctrl.getWindowDimensions = function () {
+        return {
+          'h': w.height(),
+          'w': w.width()
+        };
+      };
+
+      $scope.$watch(ctrl.getWindowDimensions, function (newValue, oldValue) {
+        ctrl.windowHeight = newValue.h;
+        ctrl.windowWidth = newValue.w;
+        $scope.style = function () {
+            return {
+              'height': (newValue.h - 100) + 'px',
+              'width': (newValue.w - 100) + 'px'
+            };
+        };
+      }, true);
+
+      w.bind('resize', function () {
+        $scope.$digest(); // use $digest() instead of $apply()
       });
 
       // realtime chart
@@ -139,7 +171,6 @@
       $window.socket.on('my_realtime_data', function(msg) {
         APP_VALUES.REAL_TIME_DATA.push(msg);
         if(APP_VALUES.REAL_TIME_DATA.length > 1000) APP_VALUES.REAL_TIME_DATA.shift();
-        console.log(APP_VALUES.REAL_TIME_DATA.length);
       });
 
       ctrl.initRealtimeChart = function(){
@@ -152,7 +183,6 @@
             width = 680 - margin.left,
             height = 150 - margin.top - margin.bottom;
 
-        console.log(d3.time);
         var x = d3.time.scale()
                   .domain([now - (n - 2) * duration, now - duration])
                   .range([0, width]);
@@ -239,5 +269,97 @@
       };
       ctrl.initRealtimeChart();
     }]);
+
+    // ctrl of responsive donuts chart
+    window.indexApp.controller('donutsChartCtrl', ['$scope', '$window', 'APP_VALUES', 'dataProvider', function($scope, $window, APP_VALUES, dataProvider){
+      var ctrl = this;
+      ctrl.init = function(){
+        console.log('init donutsChartCtrl...');
+        ctrl.charts = [[12,34,6], [7,31,6], [8,24,6], [2,30,5,29]];
+      };
+
+      angular.element($window).on('resize', function(){
+        $scope.$digest(); // use $digest instead of $apply to only update the specific scope
+      });
+    }]);
+    // end of ctrl of responsive donuts chart
+
+    // donut chart directive
+    window.indexApp.directive('donutChart', function($window){
+      function link(scope, el){
+        var myWindow = angular.element($window);
+        var data = scope.data,
+          color = d3.scale.category10(),
+          el = el[0],
+          width = myWindow.width() * 0.2,
+          height = myWindow.height() * 0.4,
+          min = Math.min(width, height),
+          pie = d3.layout.pie().sort(null),
+          arc = d3.svg.arc()
+                  .outerRadius(min / 2 * 0.9)
+                  .innerRadius(min / 2 * 0.5),
+          svg = d3.select(el).append('svg');
+        var g = svg.append('g');
+        var arcs = g.selectAll('path');
+
+        svg.on('mousedown', function(){
+          scope.$apply(function(){
+            var num = Math.round(Math.random()* 10) + 1
+            scope.data = d3.range(num).map(Math.random)
+          })
+        });
+
+        function arcTween(a) {
+          // see: http://bl.ocks.org/mbostock/1346410
+          var i = d3.interpolate(this._current, a);
+          this._current = i(0);
+          return function(t) {
+            return arc(i(t));
+          };
+        }
+
+        scope.$watch('data', function(data){
+          var duration = 1000
+          arcs = arcs.data(pie(data))
+          arcs.transition()
+            .duration(duration)
+            .attrTween('d', arcTween)
+          
+          arcs.enter()
+            .append('path')
+            .style('stroke', 'white')
+            .attr('fill', function(d, i){ return color(i) })
+            .each(function(d) {
+              this._current = { startAngle: 2 * Math.PI - 0.001, endAngle: 2 * Math.PI }
+            })
+            .transition()
+            .duration(duration)
+            .attrTween('d', arcTween)
+          
+          arcs.exit()
+            .transition()
+            .duration(duration)
+            .each(function(d){ 
+              d.startAngle = 2 * Math.PI - 0.001; d.endAngle = 2 * Math.PI; 
+            })
+            .attrTween('d', arcTween).remove();
+        })
+
+        scope.$watch(function(){
+          return myWindow.width() * myWindow.height();
+        }, function(){
+          width = myWindow.width() * 0.2;
+          height = myWindow.height() * 0.4;
+          min = Math.min(width, height);
+          arc.outerRadius(min / 2 * 0.9).innerRadius(min / 2 * 0.5);
+          svg.attr({width: width, height: height});
+          g.attr('transform', 'translate(' + (width / 2) + ',' + (height / 2) + ')');
+          arcs.attr('d', arc);
+        });
+      };
+      return {link: link, restrict: 'AE', scope: {data: '='}};
+    });
+    // end of donut chart directive
+
   };
 })(jQuery);

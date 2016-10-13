@@ -1,10 +1,14 @@
-<div class="col-md-12">
+<div class="col-lg-12" ng-controller="donutsChartCtrl as ctrl" ng-init="ctrl.init()">
   <div class="panel panel-default">
       <div class="panel-heading">
           <h3>Section-2</h3>
       </div>
       <div class="panel-body">
         Learn the Tech., Connect the World.
+        <hr>
+        <div>
+          <div donut-chart data="chart" ng-repeat="chart in ctrl.charts track by $index" class="donut-chart"></div>
+        </div>
       </div>
   </div>
 </div>
