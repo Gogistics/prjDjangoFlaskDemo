@@ -58,3 +58,15 @@ Ref.
 [Flask-SocketIO](https://flask-socketio.readthedocs.io/en/latest/)
 
 [Flask-SocketIO/example](https://github.com/miguelgrinberg/Flask-SocketIO/tree/master/example)
+
+[AngularJS + D3 Demos](https://github.com/vicapow/angular-d3-talk/tree/master/slides/demos)
+
+[SVG Paths and D3.js](https://www.dashingd3js.com/svg-paths-and-d3js)
+
+[D3 Transition](https://bost.ocks.org/mike/transition/)
+
+[Applying a colour gradient to a graph line with D3.js](http://www.d3noob.org/2013/01/applying-colour-gradient-to-graph-line.html)
+
+[SVG Tutorial](http://www.w3schools.com/graphics/svg_intro.asp)
+
+[D3 extent](http://bl.ocks.org/phoebebright/3061203)
