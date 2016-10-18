@@ -131,7 +131,7 @@
       // set variables and functions of ctrl
       var ctrl = this;
       ctrl.init = function(){
-        console.log('init...');
+        console.log('init indexCtrl');
       };
 
       // resize listener for data visualization
@@ -164,7 +164,7 @@
       // set variables and functions of ctrl
       var ctrl = this;
       ctrl.init = function(){
-        console.log('init realtime chart section...');
+        console.log('init realtimeChartCtrl');
       };
 
       // resize listener for data visualization
@@ -198,10 +198,7 @@
         if(APP_VALUES.REAL_TIME_DATA.length > 1000) APP_VALUES.REAL_TIME_DATA.shift();
       });
       
-      ctrl.playRingtone = function(arg_sound_path){
-        $window.document.getElementById('highPeakAlert').innerHTML = '<embed src="' + arg_sound_path + '" hidden="true" autostart="true" loop="false" />';
-      };
-
+      ctrl.ringtone = new Audio('/static/sounds/ringtone_2.mp3'); // play ringtone while random number is bigger than 8
       ctrl.initRealtimeChart = function(){
         var n = 245,
             duration = 700,
@@ -217,8 +214,8 @@
                   .range([0, width]);
 
         var y = d3.scale.linear()
-                      .domain([0, 11]) // range of y axis
-                      .range([height, 0]);
+                  .domain([0, 11])
+                  .range([height, 0]);
 
         var line = d3.svg.line()
                     .interpolate('basis')
@@ -280,10 +277,12 @@
             x.domain([now - (n - 2) * duration, now - duration]);
             y.domain([0, 11]);
 
-
             // incomplete
             var currentVal = APP_VALUES.REAL_TIME_DATA.shift() || {random_number: 0};
-            if(currentVal['random_number'] > 8) ctrl.playRingtone('static/sounds/ringtone_2.mp3');
+            if(currentVal['random_number'] > 8){
+              console.log('Number: ' + currentVal['random_number']);
+              ctrl.ringtone.play(); // better to implement the alert with debouncing
+            }
             data.push(currentVal['random_number']);
             
             svg.select('.line')
@@ -293,7 +292,7 @@
             xAxis.call(x.axis); // slide the x-axis left
             path.transition().attr('transform', 'translate(' + x(now - (n - 1) * duration) + ')'); // slide the line left
 
-            data.shift();
+            data.shift(); // remove the oldest data
           }).transition().each('start', tick);
         })();
         
@@ -340,7 +339,6 @@
             .append("g")
             .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")")
 
-
         // Add the background arc, from 0 to 100% (τ).
         var background = svg.append("path")
             .datum({endAngle: 2*τ})
@@ -369,7 +367,6 @@
             .attr("cy", 0)
             .attr("r", 210)
             .attr("fill", "rgba(255,255,255, .25)");
-
 
         // Create "def" element that will contain our drop shadow filter
         var defs = svg.append("defs");
@@ -424,8 +421,8 @@
             .attr("stroke", "rgba(0,0,0,.125")
             .attr("stroke-width", "1px");
 
-        var candidlogo = svg.append("g")
-                            .attr("transform", "translate(-295,-285), scale(1.75)");
+        // draw logo
+        var candidlogo = svg.append("g").attr("transform", "translate(-295,-285), scale(1.75)");
 
           candidlogo.append("path")
               .attr("d", "M134.3,233.2L134.3,233.2c0-3.3,2.6-6.2,6-6.2c2.2,0,3.6,1,4.7,2.2l-0.8,0.8c-1-1-2.2-1.9-3.9-1.9c-2.7,0-4.7,2.2-4.7,5v0c0,2.8,2.1,5.1,4.8,5.1c1.7,0,2.9-0.9,3.9-2l0.8,0.7c-1.2,1.4-2.6,2.3-4.8,2.3 C136.9,239.3,134.3,236.5,134.3,233.2z" )
@@ -576,14 +573,16 @@
     // end of donut chart directive
 
     // decoratorCtrl
-    window.indexApp.controller('decoratorCtrl', ['$scope', 'myFactory', function($scope, myFactory){
+    window.indexApp.controller('animationCtrl', ['$scope', 'myFactory', function($scope, myFactory){
       var ctrl = this;
+
+      // decorator example
       console.log(myFactory.getData());
       myFactory.addData(' + hello decortaor');
       myFactory.reverse();
       console.log(myFactory.getData());
 
-      /* my-animation */
+      /* my-animation: Example 1. */
       var width = 500,
           height = 500;
 
@@ -628,10 +627,7 @@
           .attr("fill", "url(#gradient)")
           .attr("d", function() { return raindrop(5 + Math.random() * 100); })
           .attr("transform", function(d) {
-            return "rotate(" + d + ")"
-            
-            + "translate(" + (height / 6 + Math.random() * height / 16) + ",0)"
-                + "rotate(90)";
+            return "rotate(" + d + ")" + "translate(" + (height / 6 + Math.random() * height / 16) + ",0)" + "rotate(90)";
           })
           .each("end",function() { // the first position
             d3.select(this)
@@ -640,7 +636,7 @@
               .attr("d", function() { return raindrop(0); }); // a new transition!;
           });
 
-      // size is linearly proportional to square pixels (not exact, yet)
+      // build path of raindrop
       function raindrop(size) {
         var r = Math.sqrt(size / Math.PI).toFixed(2);
         return "M" + r + ",0"
@@ -649,6 +645,97 @@
             + "C," + -r + " " + r + "," + -r + " " + r + ",0"
             + "Z";
       };
+
+      /* my-animation: Example 2. */
+      var svg = d3.select("my-line-animation").append("svg")
+                                 .attr("width", 600)
+                                 .attr("height", 300);
+
+      var lineData = [ { "x": 0, "y": 0},  { "x": 80, "y": 80},
+                 { "x": 160, "y": 40},  { "x": 300, "y": 10}],
+          endLineData = [ { "x": 0, "y": 0},  { "x": 150, "y": 120},
+                 { "x": 170, "y": 50},  { "x": 300, "y": 20}];
+
+      // set ranges of x axis and y axis
+      var x = d3.scale
+                .linear()
+                .domain([0, d3.max(lineData, function(d){ return d.x; })])
+                .range([0, width - 50]);
+      var y = d3.scale
+                .linear()
+                .domain([d3.max(lineData, function(d){ return d.y; }), 0])
+                .range([0, height - 50]);
+
+      var xAxis = svg.append('g')
+                    .attr('class', 'x axis')
+                    .attr('transform', 'translate(50,' + ( height - 250 ) + ')')
+                    .call(d3.svg.axis().scale(x).orient("bottom").ticks(10).tickSize(0, 10));
+
+      var yAxis = svg.append('g')
+                    .attr('class', 'y axis')
+                    .attr('transform', 'translate(' + ( width - 450 ) + ',-200)')
+                    .call(d3.svg.axis().scale(y).orient('left').ticks(10).tickSize(-450, 6, 0));
+
+      svg.selectAll('.x text').attr('y', '20'); // adjust positions of axis text
+      svg.select('.y line').attr('x2', '0'); // change length of the first line of y axes
+
+      var lineFunction = d3.svg.line()
+                               .x(function(d) { return d.x; })
+                               .y(function(d) { return -d.y; })
+                               .interpolate("cardinal");
+
+      var defs = svg.append("defs");
+      var gradient = defs.append("linearGradient")
+         .attr("id", "svgGradient")
+         .attr("x1", "0%")
+         .attr("x2", "100%")
+         .attr("y1", "0%")
+         .attr("y2", "100%");
+         
+      gradient.append("stop")
+         .attr('class', 'start')
+         .attr("offset", "0%")
+         .attr("stop-opacity", 0);
+
+      gradient.append("stop")
+         .attr('class', 'end')
+         .attr("offset", "50%")
+         .attr("stop-color", "#999")
+         .attr("stop-opacity", .6);
+
+      gradient.append("stop")
+         .attr('class', 'end')
+         .attr("offset", "50%")
+         .attr("stop-color", "#999")
+         .attr("stop-opacity", .6);
+         
+      gradient.append("stop")
+         .attr('class', 'end')
+         .attr("offset", "100%")
+         .attr("stop-color", "#000")
+         .attr("stop-opacity", 1);
+
+      var line = svg.append("path")
+                    .attr("d", lineFunction(lineData))
+                    .attr("stroke-width", 2)
+                    .attr("stroke", "url(#svgGradient)")
+                    .attr("stroke-linecap", "round")
+                    .attr("fill", "none")
+                    .attr('transform', 'translate(50,250)')
+                    .transition()
+                    .duration(2000)
+                    .ease("bounce")
+                    .attrTween("stroke-dasharray", function() {
+                        var len = this.getTotalLength();
+                        return function(t) { return (d3.interpolateString("0," + len, len + ",0"))(t) };
+                    })
+                    .each("end",function() { // the first position
+                      d3.select(this)
+                        .transition()
+                        .duration(3000)
+                        .delay(500)
+                        .attr("d", function() { return lineFunction(endLineData); }); // a new transition!;
+                    });
     }]);
     // end of decoratorCtrl
   };

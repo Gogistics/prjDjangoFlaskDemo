@@ -49,6 +49,11 @@
   shape-rendering: crispEdges;
 }
 
+.y.axis line {
+  stroke: #777;
+  stroke-dasharray: 2,2;
+}
+
 /* responsive donut charts */
 .donut-chart{
   height: 100%;
