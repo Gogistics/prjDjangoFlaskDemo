@@ -5,6 +5,7 @@ from datetime import timedelta
 from flask_socketio import SocketIO, emit
 from base64 import b64encode
 import os, time, random
+from models.user_models import UserModelsManager
 
 app = Flask(__name__)
 app.secret_key = b64encode(os.urandom(32)).decode('utf-8')
@@ -28,24 +29,8 @@ def background_thread():
 # set connection with postgres
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgres://myprojectuser:helloDjango@172.17.0.2:5432/myproject'
 db = SQLAlchemy(app)
-
-# db setting
-# Create our database model
-class User(db.Model):
-  """ User model """
-  __tablename__ = "users"
-  id = db.Column(db.Integer, primary_key=True)
-  email = db.Column(db.String(120), unique=True)
-
-  def __init__(self, email):
-    self.email = email
-
-  def __repr__(self):
-    return '<E-mail %r>' % self.email
-
-# create tables
-db.create_all()
-db.session.commit()
+UserModelsManager = UserModelsManager(db)
+User = UserModelsManager.get_user_model() # get User model
 
 
 # routes
