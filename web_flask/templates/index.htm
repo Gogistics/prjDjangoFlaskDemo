@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+{% block sub_css %}
+<link href="{{ url_for('static', filename='css/styles.css') }}" rel="stylesheet">
+{% endblock sub_css %}
+
+{% block content %}
+<div ng-controller="indexCtrl as ctrl" ng-init="ctrl.init()">
+    <div ng-include="'my_ng_templates/banner.html'"></div>
+    <div class="container">
+        <hr>
+        <div ng-view></div>
+        <div ng-include="'my_ng_templates/footer.html'"></div>
+    </div>
+</div>
+{% endblock %}
+
+{% block sub_js %}
+<script type="text/javascript" src="{{ url_for('static', filename='js/scripts.js') }}"></script>
+{% endblock %}

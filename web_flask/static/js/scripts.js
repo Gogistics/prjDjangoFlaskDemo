@@ -1,4 +1,12 @@
+/**
+* Demo/Tutorials for D3.js
+* 
+* @authoer: Alan Tai <gogistics@gogistics-tw.com>
+* @description: Implement data visualization with D3.js and Angular.js
+*/
+
 (function($){
+  'use strict';
   /*
     calling order:
     1. app.config()
@@ -9,11 +17,11 @@
   */
 
   angular.element(document.body).ready(function(){
-    // bootstrap App
+    // bootstrap ng-App
     angular.bootstrap(document.body, ['indexApp']);
   });
 
-  // init App
+  // init ng-App
   initApp();
 
   function initApp(){
@@ -26,7 +34,7 @@
       $interpolateProvider.endSymbol(']]');
     });
 
-    // global values
+    // set global values
     window.indexApp.value('APP_VALUES', {
       EMAIL: 'gogistics@gogistics-tw.com',
       BINARY_STREAM: null,

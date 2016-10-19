@@ -41,6 +41,13 @@ app@my_vm:web_django/$ docker build -t app_flask:latest .
 app@my_vm:web_django/$ docker run --name my_django -v $(pwd):/app -p 5001:8000 -d app_flask:latest
 ```
 
+Create a dodo.py and execute the following command for tasks automation
+
+```
+app@my_vm:web_django/$ doit
+
+```
+
 ===
 
 SocketIO
