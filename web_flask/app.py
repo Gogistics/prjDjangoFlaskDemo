@@ -1,58 +1,39 @@
 # -*- coding: utf-8 -*-
-from flask import Flask, render_template, request, session
+from flask import Flask, session
+from flask_redis import FlaskRedis
+from flask_session.sessions import RedisSessionInterface
 from flask_sqlalchemy import SQLAlchemy
 from datetime import timedelta
-# from flask_socketio import SocketIO, emit
 from base64 import b64encode
-from models.user_models import UserModelsManager
-import os, time
+import os, time, redis
 from routes.socketio_routes import MySocketIO
+from routes.partials_routes import MyPartials
+from routes.index_routes import MyIndex
 
 # set app
 app = Flask(__name__)
-app.secret_key = b64encode(os.urandom(32)).decode('utf-8')
+secret_key = b64encode(os.urandom(32)).decode('utf-8')
+app.secret_key = secret_key
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
 
+# set redis
+app.config['REDIS_URL'] = 'redis://172.17.0.2:6379/0'
+redis_store = FlaskRedis(app)
+
+# set redis for session management
+redis_storage = redis.Redis( host='172.17.0.2', port=6379, db=2, charset='utf-8')
+app.session_interface = RedisSessionInterface(redis=redis_storage, key_prefix='session_flask:', use_signer=True)
+
 # set db connection with postgres
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgres://myprojectuser:helloDjango@172.17.0.2:5432/myproject'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgres://myprojectuser:helloDjango@172.17.0.3:5432/myproject'
 db = SQLAlchemy(app)
-UserModelsManager = UserModelsManager(db)
-User = UserModelsManager.get_user_model() # get User model
 
-# set SocketIO
-my_socketio = MySocketIO(app)
-
-# routes
-@app.route('/')
-def index():
-  if 'auth_base' not in session:
-    session['auth_base'] = {'permission': 1, 'tkn': b64encode(os.urandom(12)).decode('utf-8')}
-    app.permanent_session_lifetime = timedelta(minutes=360)
-    
-  print '<--- session --->'
-  print str(session['auth_base'])
-  return render_template('index.html', async_mode = my_socketio.get_socketio().async_mode)
-
-@app.route('/prereg', methods = ['POST'])
-def prereg():
-  email = None
-  if request.method == 'POST':
-    email = request.form['email']
-
-    if not db.session.query(User).filter(User.email == email).count():
-      reg = User(email)
-      db.session.add(reg)
-      db.session.commit()
-      return render_template('success.html')
-  return render_template('index.html')
-
-# route of getting partial/sub templates
-@app.route('/my_ng_templates/<sub_template>')
-def partial(sub_template):
-  template_path = 'my_ng_templates/{sub_template}'.format(sub_template = sub_template)
-  return render_template(template_path, jinja_var='jinja sub-template')
+# set routes of SocketIO
+my_socketio_routes = MySocketIO(app)
+my_partials_routes = MyPartials(app)
+my_index_routes = MyIndex(app, my_socketio_routes.get_socketio(), db, session, redis_store)
 
 # entry
 if __name__ == '__main__':
-  # app.run(debug=True,host='0.0.0.0',port=5000)
-  my_socketio.get_socketio().run(app, host='0.0.0.0', port=5000, debug=True)
+  # app.run(debug=True,host='0.0.0.0',port=5000) # run app without socketio
+  my_socketio_routes.get_socketio().run(app, host='0.0.0.0', port=5000, debug=True)

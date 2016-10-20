@@ -66,6 +66,16 @@ Ref.
 
 [Flask-SocketIO/example](https://github.com/miguelgrinberg/Flask-SocketIO/tree/master/example)
 
+[Redis-Py](https://redis-py.readthedocs.io/en/latest/)
+
+[Flask-Session](https://pythonhosted.org/Flask-Session/)
+
+[flask-redis](https://github.com/underyx/flask-redis)
+
+[flask-multi-session](https://github.com/nbob/flask-multi-session)
+
+[RedisSessionStore.py](https://gist.github.com/linnchord/1154472)
+
 [AngularJS + D3 Demos](https://github.com/vicapow/angular-d3-talk/tree/master/slides/demos)
 
 [SVG Paths and D3.js](https://www.dashingd3js.com/svg-paths-and-d3js)
