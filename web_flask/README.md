@@ -3,9 +3,9 @@
 ##### Default MySQL Setting
 
 ```
-app@my_vm:/$ cd prjDjangoFlask/web_django/
+app@my_vm:/$ cd prjDjangoFlask/web_flask/
 
-app@my_vm:web_django/$ docker run --name my_mysql -e MYSQL_ROOT_PASSWORD=Django168 -d mysql
+app@my_vm:web_flask/$ docker run --name my_mysql -e MYSQL_ROOT_PASSWORD=Django168 -d mysql
 ```
 
 ##### Default Postgres Setting
@@ -16,9 +16,9 @@ user: postgres
 pwd: Django168
 
 ```
-app@my_vm:/$ cd prjDjangoFlask/web_django/
+app@my_vm:/$ cd prjDjangoFlask/web_flask/
 
-app@my_vm:web_django/$ docker run --name my_postgres -e POSTGRES_PASSWORD=Django168 -d mdillon/postgis
+app@my_vm:web_flask/$ docker run --name my_postgres -e POSTGRES_PASSWORD=Django168 -d mdillon/postgis
 ```
 
 ##### DB User
@@ -34,18 +34,25 @@ admin: gogistics
 pwd: Django168
 
 ```
-app@my_vm:/$ cd prjDjangoFlask/web_django/
+app@my_vm:/$ cd prjDjangoFlask/web_flask/
 
-app@my_vm:web_django/$ docker build -t app_flask:latest .
+app@my_vm:web_flask/$ docker build -t app_flask:latest .
 
-app@my_vm:web_django/$ docker run --name my_django -v $(pwd):/app -p 5001:8000 -d app_flask:latest
+app@my_vm:web_flask/$ docker run --name my_django -v $(pwd):/app -p 5001:8000 -d app_flask:latest
 ```
 
 Create a dodo.py and execute the following command for tasks automation
 
 ```
-app@my_vm:web_django/$ doit
+app@my_vm:web_flask/$ doit
 
+```
+
+
+Implement RabbitMQ
+
+```
+app@my_vm:web_flask/$ docker run -d --hostname my-rabbit --name some-rabbit rabbitmq:3
 ```
 
 ===
@@ -75,6 +82,12 @@ Ref.
 [flask-multi-session](https://github.com/nbob/flask-multi-session)
 
 [RedisSessionStore.py](https://gist.github.com/linnchord/1154472)
+
+[How To Use Celery with RabbitMQ to Queue Tasks on an Ubuntu VPS](https://www.digitalocean.com/community/tutorials/how-to-use-celery-with-rabbitmq-to-queue-tasks-on-an-ubuntu-vps)
+
+[RabbitMQ Docker Container](https://hub.docker.com/_/rabbitmq/)
+
+[First Steps with Celery](http://docs.celeryproject.org/en/latest/getting-started/first-steps-with-celery.html#choosing-a-broker)
 
 [AngularJS + D3 Demos](https://github.com/vicapow/angular-d3-talk/tree/master/slides/demos)
 
