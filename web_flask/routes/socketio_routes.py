@@ -3,6 +3,7 @@ from flask_socketio import SocketIO, emit
 import random
 
 class MySocketIO(object):
+  ''' SocketIO Route '''
   def __init__(self, app):
     self.__async_mode = None
     self.__thread = None
