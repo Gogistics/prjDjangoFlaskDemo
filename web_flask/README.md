@@ -65,6 +65,8 @@ Ref.
 
 [Python Coding Style](https://www.python.org/dev/peps/pep-0008/)
 
+[Code Style](http://docs.python-guide.org/en/latest/writing/style/)
+
 [Flask with Angular.js](https://gist.github.com/jstacoder/863a5df5d7bb76c88323)
 
 [Dockerize Simple Flask App](http://containertutorials.com/docker-compose/flask-simple-app.html#requirements-file)
