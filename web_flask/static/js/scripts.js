@@ -29,6 +29,18 @@
   // init ng-App
   initApp();
 
+  /**
+  * Forward opeartion request to the matched case to trigger the operation based on the given operator
+  *
+  * @param {string} arg_str - a command read from prompt or text file
+  * @return {Object} res - response object contains result and status
+  * @return {string} res['result'] - result of operation
+  * @return {string} res['status'] - status of operation
+  * 
+  * @example
+  * // return { result: '--- SET or UNSET Done ---', status: 'successful' }
+  * myJSDB.doOperation( 'SET a 10' );
+  */
   function initApp(){
     // set module
     window.indexApp = window.indexApp || angular.module('indexApp', ['ngRoute'], function($locationProvider, $interpolateProvider){
