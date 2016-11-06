@@ -45,7 +45,8 @@
     <script type="text/javascript" src="{{ url_for('static', filename='js/angular.min.js') }}"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='js/angular-route.js') }}"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='js/d3.v3.min.js') }}"></script>
-    <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/socket.io/1.3.6/socket.io.min.js"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='js/socket.io.min.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='webrtc-adapter/out/adapter.js') }}"></script>
     {% block sub_js %}{% endblock sub_js %}
 </body>
 </html>

@@ -14,7 +14,12 @@
     3. directive's compile functions (if they are found in the dom)
     4. app.controller()
     5. directive's link functions (again, if found)
+
+    WebRTC:
+    console.log(adapter.browserDetails.browser + '-' + adapter.browserDetails.version);
+    console.log(adapter.browserShim);
   */
+
 
   angular.element(document.body).ready(function(){
     // bootstrap ng-App
@@ -25,7 +30,6 @@
   initApp();
 
   function initApp(){
-
     // set module
     window.indexApp = window.indexApp || angular.module('indexApp', ['ngRoute'], function($locationProvider, $interpolateProvider){
 

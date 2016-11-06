@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 def task_data():
   """ Minification Task """
   tasks = [{ 'name' : 'minify js scripts',
