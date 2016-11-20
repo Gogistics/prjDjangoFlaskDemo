@@ -104,3 +104,7 @@ Ref.
 [SVG Tutorial](http://www.w3schools.com/graphics/svg_intro.asp)
 
 [D3 extent](http://bl.ocks.org/phoebebright/3061203)
+
+[HTML5 Shiv](https://github.com/aFarkas/html5shiv)
+
+[wiredep](https://github.com/taptapship/wiredep)

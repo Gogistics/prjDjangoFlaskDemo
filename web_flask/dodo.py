@@ -1,11 +1,14 @@
 # -*- coding: utf-8 -*-
 def task_data():
   """ Minification Task """
-  tasks = [{ 'name' : 'minify js scripts',
+  tasks = [{ 'name': 'update Bower packages and files\' paths in base.htm',
+            'actions': ['cd ./static && bower install && cd ../',
+                        'node update_bower_packages.js']},
+            { 'name' : 'minify js scripts',
             'actions': ['python -m jsmin ./static/js/scripts.js > ./static/js/scripts.min.js'],
-          }, { 'name': 'minify css styles',
+          },{ 'name': 'minify css styles',
               'actions': ['python -m csscompressor -o ./static/css/styles.min.css ./static/css/styles.css'],
-          }, { 'name': 'minify html templates',
+          },{ 'name': 'minify html templates',
               'actions': ['htmlmin ./templates/index.htm > ./templates/index.html',
                           'htmlmin ./templates/base.htm > ./templates/base.html',
                           'htmlmin ./templates/success.htm > ./templates/success.html',

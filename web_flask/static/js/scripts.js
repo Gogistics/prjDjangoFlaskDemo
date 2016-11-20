@@ -14,10 +14,6 @@
     3. directive's compile functions (if they are found in the dom)
     4. app.controller()
     5. directive's link functions (again, if found)
-
-    WebRTC:
-    console.log(adapter.browserDetails.browser + '-' + adapter.browserDetails.version);
-    console.log(adapter.browserShim);
   */
 
 
@@ -30,7 +26,7 @@
   initApp();
 
   /**
-  * Forward opeartion request to the matched case to trigger the operation based on the given operator
+  * Initialize ng-app and all settings for ng-app; following comments are as reference
   *
   * @param {string} arg_str - a command read from prompt or text file
   * @return {Object} res - response object contains result and status
@@ -50,7 +46,10 @@
       $interpolateProvider.endSymbol(']]');
     });
 
-    // set global values
+    /**
+     * Initialize Notes Controller
+     * @param $scope, current controller scope
+     */ 
     window.indexApp.value('APP_VALUES', {
       EMAIL: 'gogistics@gogistics-tw.com',
       BINARY_STREAM: null,
@@ -58,6 +57,10 @@
       REAL_TIME_DATA: []
     });
 
+    /**
+     * Initialize Notes Controller
+     * @param $scope, current controller scope
+     */ 
     window.indexApp.config(function($routeProvider, $compileProvider, $provide){
       // $compileProvider.debugInfoEnabled(false); // for production
 
@@ -83,6 +86,10 @@
       });
     });
 
+    /**
+     * Initialize Notes Controller
+     * @param $scope, current controller scope
+     */
     window.indexApp.run(function($window, APP_VALUES){
       // enable socket
       var protocol = $window.location.protocol, host = $window.location.host, my_url = protocol + '//' + host + '/test';
@@ -97,7 +104,10 @@
       });
     });
 
-    // services of serving $http
+    /**
+     * Initialize dataProvider service
+     * @param APP_VALUES,
+     */ 
     window.indexApp.service('dataProvider', function($http, APP_VALUES){
       this.getData = function(arg_url, arg_headers, arg_data){
         return $http({
@@ -109,7 +119,10 @@
       }
     });
 
-    // factories
+    /**
+     * Initialize myFactory factory
+     * No dependency needed
+     */
     window.indexApp.factory('myFactory', function(){
       var myStr = 'init data';
       var addToStr = function(newStr){
@@ -124,7 +137,10 @@
               addData: addToStr};
     });
 
-    // directives
+    /**
+     * Initialize myFactory factory
+     * Dependency: $window
+     */
     window.indexApp.directive('tooltip', function($window) {
         return {
             restrict: 'AE',
@@ -150,7 +166,10 @@
         };
     });
 
-    // watcher controller which handle everything inside watcher scope
+    /**
+     * Initialize indexCtrl controller
+     * Dependency: $scope, $window, APP_VALUES, dataProvider
+     */
     window.indexApp.controller('indexCtrl', ['$scope', '$window', 'APP_VALUES', 'dataProvider', function($scope, $window, APP_VALUES, dataProvider){
       // set variables and functions of ctrl
       var ctrl = this;
