@@ -47,9 +47,19 @@ app@my_vm:web_django/$ docker run --name my_django -v $(pwd):/app -p 5001:8000 -
 
 ```
 
-Install Doit for Automation
+Install Doit and required libraries for Automation
 
 ```
+app@my_vm:web_django/$ pip install --upgrade setuptools --user python
+
+app@my_vm:web_django/$ sudo pip install https://pypi.python.org/packages/source/d/doit/doit-0.29.0.tar.gz
+
+app@my_vm:web_django/$ sudo pip install jsmin
+
+app@my_vm:web_django/$ sudo pip install csscompressor
+
+app@my_vm:web_django/$ sudo pip install htmlmin
+
 app@my_vm:web_django/$ sudo pip install doit
 
 ```
@@ -74,3 +84,5 @@ Ref.
 [Doit Automation Tool](http://pydoit.org/install.html)
 
 [doit: a Python alternative to make](https://blogs.aalto.fi/marijn/2016/02/25/doit-a-python-alternative-to-make/)
+
+[Doit=0.29.0](https://www.versioneye.com/python/doit/0.29.0)
